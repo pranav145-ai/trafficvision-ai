@@ -1,48 +1,57 @@
 # TrafficVision AI
 
-TrafficVision AI is an academic prototype for exploring traffic-sign detection through a React + Vite frontend and a Flask API backend.
+TrafficVision AI is an academic prototype with a React + Vite frontend, Flask API, and Ultralytics YOLO inference.
 
-## Project status
+## Detection model
 
-- The UI starts in demo mode and uses mock detections.
-- The Flask endpoint `POST /api/detect` also returns mock detections.
-- This repository does **not** include a trained detection model or model weights.
-- It is an educational prototype, not a certified road-safety system.
+- The backend runs real YOLO inference through `POST /api/detect`.
+- Default weights: `yolov8n.pt`, downloaded by Ultralytics on first inference.
+- The default COCO model recognizes general object classes including traffic lights, but does **not** reliably recognize speed-limit signs or distinguish red/yellow/green signal states.
+- For traffic-sign detection, use a custom model trained on the exact classes you need and set `TRAFFICVISION_MODEL` to its `.pt` file path.
 
-## Structure
+## Run locally (Windows)
 
-- `frontend/` — React and Vite interface
-- `backend/` — Flask API and mock detector
-- `dataset/` — dataset notes
-- `model/weights/` — notes about model weights (weights are not included)
+Use Python 3.11 or 3.12.
 
-## Run locally
+### Backend terminal
 
-### Backend
-
-```bash
+```powershell
 cd backend
 python -m venv venv
-# Windows:
 venv\Scripts\activate
-# macOS/Linux:
-# source venv/bin/activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 python app.py
 ```
 
-### Frontend
+The first model inference downloads the pretrained YOLO weights and needs internet access. The Flask API runs on http://localhost:5000.
 
-In a second terminal:
+### Frontend terminal
 
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-See `backend/README.md` and the frontend package scripts for project-specific details.
+Open the Vite URL shown in the terminal (usually http://localhost:5173), upload an image, and click **Analyze with YOLO**.
 
-## Disclaimer
+## Use custom traffic-sign weights
 
-This project is for academic demonstration only. Do not rely on its mock detections for driving, navigation, or any safety-critical decision.
+Place your trained model locally, then set the path before starting Flask:
+
+```powershell
+$env:TRAFFICVISION_MODEL="model/weights/your-trained-model.pt"
+python app.py
+```
+
+Do not commit large model files to Git. The custom model must include the target classes, e.g. speed-limit signs and traffic lights. Traffic-light object detection alone does not classify the signal's illuminated color.
+
+## Structure
+
+- `frontend/` — React and Vite interface
+- `backend/` — Flask API and YOLO inference
+- `dataset/` — dataset notes
+- `model/weights/` — local model weights (not committed)
+
+This is an academic demo, not a safety-critical driving system.
