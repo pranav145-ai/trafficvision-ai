@@ -9,7 +9,13 @@ app.register_blueprint(detect_bp, url_prefix="/api")
 
 @app.get("/")
 def home():
-    return {"project": "TrafficVision AI", "status": "backend online", "mode": "mock"}
+    return {
+        "project": "TrafficVision AI",
+        "status": "backend online",
+        "mode": "yolo",
+        "default_model": "yolov8n.pt",
+        "model_note": "COCO pretrained; custom traffic-sign weights needed for speed-limit signs"
+    }
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
