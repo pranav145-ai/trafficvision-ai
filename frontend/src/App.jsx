@@ -25,7 +25,8 @@ export default function App() {
 
   function demo() {
     setError("");
-    setResult({ mode: "mock", detections: [{ class: "Stop Sign", confidence: 0.964, x: 120, y: 85, width: 80, height: 95 }] });
+    // The demo has no trained model, so never invent a sign prediction.
+    setResult({ mode: "mock", detections: [] });
   }
 
   return <div className="app-shell">
@@ -40,7 +41,7 @@ export default function App() {
           {error && <p className="error"><CircleAlert size={15}/>{error}</p>}
         </div>
         <div className="panel results-panel"><div className="panel-heading"><div><div className="eyebrow">02 / RESULTS</div><h2>Detection report</h2></div><span className="live-label"><i/> LIVE PREVIEW</span></div>
-          {!result ? <div className="empty-state"><div className="radar"><div/><Camera size={28}/></div><h3>Waiting for an image</h3><p>Upload an image and run analysis, or try the sample demo to see a mock detection report.</p><div className="empty-lines"><span/><span/><span/></div></div> : <div className="result-content"><div className="result-banner"><span className="result-check">✓</span><div><strong>{result.detections?.length || 0} sign(s) detected</strong><small>Mode: {result.mode || "mock"} · Illustrative output</small></div></div>{(result.detections||[]).map((d,i)=><div className="detection" key={i}><div className="sign-chip">⚠</div><div className="detection-info"><strong>{d.class}</strong><small>Bounding box · {d.width} × {d.height}</small><div className="confidence"><span style={{width:(d.confidence*100)+"%"}}/></div></div><strong className="percent">{Math.round(d.confidence*100)}%</strong></div>)}<p className="result-disclaimer">These are mock results for interface demonstration, not real model predictions.</p></div>}
+          {!result ? <div className="empty-state"><div className="radar"><div/><Camera size={28}/></div><h3>Waiting for an image</h3><p>Upload an image and run analysis, or try the sample demo to see a mock detection report.</p><div className="empty-lines"><span/><span/><span/></div></div> : <div className="result-content"><div className="result-banner"><span className="result-check">✓</span><div><strong>{result.mode === "mock" && !(result.detections || []).length ? "No trained model connected" : `${result.detections?.length || 0} sign(s) detected`}</strong><small>{result.mode === "mock" ? "Demo mode · No real prediction made" : "Mode: " + result.mode}</small></div></div>{(result.detections||[]).map((d,i)=><div className="detection" key={i}><div className="sign-chip">⚠</div><div className="detection-info"><strong>{d.class}</strong><small>Bounding box · {d.width} × {d.height}</small><div className="confidence"><span style={{width:(d.confidence*100)+"%"}}/></div></div><strong className="percent">{Math.round(d.confidence*100)}%</strong></div>)}<p className="result-disclaimer">{result.mode === "mock" ? "This project currently has no trained detection model. Uploading an image cannot identify its sign yet." : "Predictions depend on model accuracy and image quality."}</p></div>}
         </div>
       </section>
       <section className="sign-section"><div className="section-intro"><div className="eyebrow">REFERENCE LIBRARY</div><h2>Know your signs</h2><p>A few common sign categories represented in the prototype.</p></div><div className="sign-grid">{signs.map(s=><article className="sign-card" key={s.name}><div className={"traffic-sign "+s.shape} style={{"--sign-color":s.color}}><span>{s.shape==="octagon"?"STOP":s.shape==="triangle"?"!":s.name==="No entry"?"−":"50"}</span></div><h3>{s.name}</h3><p>{s.note}</p></article>)}</div></section>
