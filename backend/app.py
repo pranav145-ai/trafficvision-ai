@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from routes.detect import detect_bp
+from utils.yolo_detector import DEFAULT_REPO_ID
 
 app = Flask(__name__)
 CORS(app)
@@ -13,8 +14,9 @@ def home():
         "project": "TrafficVision AI",
         "status": "backend online",
         "mode": "yolo",
-        "default_model": "yolov8n.pt",
-        "model_note": "COCO pretrained; custom traffic-sign weights needed for speed-limit signs"
+        "model": "Traffic-specific YOLOv8m",
+        "model_source": DEFAULT_REPO_ID,
+        "model_note": "Classes include traffic light, stop, speed-limit and crosswalk-related objects; validate on local road imagery."
     }
 
 if __name__ == "__main__":
