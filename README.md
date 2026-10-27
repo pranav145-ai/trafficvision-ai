@@ -1,13 +1,13 @@
 # TrafficVision AI
 
-TrafficVision AI is an academic prototype with a React + Vite frontend, Flask API, and Ultralytics YOLO inference.
+TrafficVision AI is a React + Vite frontend with a Flask API and a traffic-specific Ultralytics YOLO detector.
 
-## Detection model
+## Model
 
-- The backend runs real YOLO inference through `POST /api/detect`.
-- Default weights: `yolov8n.pt`, downloaded by Ultralytics on first inference.
-- The default COCO model recognizes general object classes including traffic lights, but does **not** reliably recognize speed-limit signs or distinguish red/yellow/green signal states.
-- For traffic-sign detection, use a custom model trained on the exact classes you need and set `TRAFFICVISION_MODEL` to its `.pt` file path.
+The backend defaults to a community YOLOv8m model hosted on Hugging Face:
+https://huggingface.co/subhodeepmoitra/Traffic_signals_detection_YOLOv8m
+
+The publisher lists classes for traffic-light signals, stop signals, speed-limit signals, crosswalk-related objects, pedestrians, buses, cars and trucks. The model downloads automatically on first inference and is cached locally. Its reported validation metrics are from the publisher, not our own tests. It is not specifically trained for Indian road signs, so evaluate it on suitable local data before claiming accuracy.
 
 ## Run locally (Windows)
 
@@ -24,7 +24,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The first model inference downloads the pretrained YOLO weights and needs internet access. The Flask API runs on http://localhost:5000.
+The first inference requires internet access to download model weights from Hugging Face. Flask runs on http://localhost:5000.
 
 ### Frontend terminal
 
@@ -34,24 +34,38 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL shown in the terminal (usually http://localhost:5173), upload an image, and click **Analyze with YOLO**.
+Open the Vite URL (usually http://localhost:5173), upload an image, and click **Analyze with YOLO**.
 
-## Use custom traffic-sign weights
+## Evaluate model performance
 
-Place your trained model locally, then set the path before starting Flask:
+Use a labeled dataset in Ultralytics YOLO format with a dataset YAML file containing train/val/test paths and class names:
 
 ```powershell
-$env:TRAFFICVISION_MODEL="model/weights/your-trained-model.pt"
-python app.py
+cd backend
+python scripts/evaluate_model.py --data "C:/datasets/traffic-signs/data.yaml" --split test
 ```
 
-Do not commit large model files to Git. The custom model must include the target classes, e.g. speed-limit signs and traffic lights. Traffic-light object detection alone does not classify the signal's illuminated color.
+Metrics and plots are saved under `backend/runs/evaluation/traffic-sign-test`. Use a held-out test split that was not used for training or tuning. Report precision, recall, mAP@0.50, mAP@0.50:0.95 and inference time; don't invent results.
+
+## Fine-tune a model
+
+```powershell
+cd backend
+python scripts/train_traffic_signs.py --data "C:/datasets/traffic-signs/data.yaml" --epochs 50
+```
+
+Use a compatible GPU or Google Colab for faster training. The dataset must have labeled bounding boxes and YOLO-format annotations. To use local weights:
+
+```powershell
+$env:TRAFFICVISION_MODEL="model/weights/best.pt"
+python app.py
+```
 
 ## Structure
 
 - `frontend/` — React and Vite interface
-- `backend/` — Flask API and YOLO inference
+- `backend/` — Flask API, YOLO inference, training and evaluation scripts
+- `backend/scripts/` — training and evaluation utilities
 - `dataset/` — dataset notes
-- `model/weights/` — local model weights (not committed)
 
-This is an academic demo, not a safety-critical driving system.
+Academic prototype only; not for safety-critical driving decisions.
