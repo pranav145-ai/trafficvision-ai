@@ -5,9 +5,16 @@ Example:
 """
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from ultralytics import YOLO
+
+# Allow running this script as: python scripts/evaluate_model.py from backend/.
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
 from utils.yolo_detector import default_model_path
 
 
